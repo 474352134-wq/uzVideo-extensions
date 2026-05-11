@@ -155,7 +155,7 @@ async function getSubclassList(args) {
         { name: '地区', list: commonArea },
         // 示例里不需要 2026，可自行改成 makeYearList(2026,1999)
         { name: '年份', list: makeYearList(2025, 1999) },
-        { name: '排序', list: commonSort },
+        { name: '排リーズ', list: commonSort },
       ]
       break
 
