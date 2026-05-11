@@ -1,13 +1,16 @@
 //@name:{LHM}豆瓣
 //@version:8
 //@webSite:https://movie.douban.com
-//@remark:使用网页爬取的方式实现豆瓣视频源，已在年份过滤中加入 2026
+//@remark:使用网页爬取的方式实现豆瓣视频源，已在年份过滤中加入 2026 年
 //@order:A01
 //@codeID:
 //@env:
 //@isAV:0
 //@deprecated:0
 
+/* -------------------------------------------------
+   辅助：生成年份下拉列表（已覆盖到 2026 年）
+   ------------------------------------------------- */
 function makeYearList(start, end) {
   const years = [{ name: '全部', id: '' }]
   for (let y = start; y >= end; y--) {
@@ -145,7 +148,7 @@ async function getSubclassList(args) {
           list: [
             { name: '全部', id: '' },
             { name: '自然', id: '自然' },
-            { name: '历史', id: '历史' },
+            { name: '历史', id: 'history' },
             { name: '科技', id: '科技' },
           ],
         },
@@ -166,40 +169,30 @@ async function getSubclassList(args) {
 }
 
 /* -------------------------------------------------
-   3️⃣ 列表页面（示例：豆瓣 Top250，分页 25 条）
+   3️⃣ 列表页面（使用豆瓣搜索 API，更稳定）
    ------------------------------------------------- */
 async function getVideoList(args) {
   const backData = new RepVideoList()
   try {
     const page = Number(args.page || 1)
-    const startIdx = (page - 1) * 25
-    const url = `https://movie.douban.com/top250?start=${startIdx}&limit=25`
+    const startIdx = (page - 1) * 20   // 每页 20 条
+    const url = `https://movie.douban.com/j/search_subjects?type=movie&tag=热门&sort=recommend&page_limit=20&page_start=${startIdx}`
 
     const resp = await req(url, {
       headers: {
-        // 伪装成常见浏览器，防止豆瓣返回 403
         'User-Agent':
           'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
       },
     })
-    const $ = cheerio.load(resp.data || '')
-
-    const list = $('.grid_view li')
-      .toArray()
-      .map((el) => {
-        const $el = $(el)
-        const a = $el.find('a')
-        const img = $el.find('img')
-        const info = $el.find('.info')
-
-        const vd = new VideoDetail()
-        vd.vod_id = a.attr('href') || ''
-        vd.vod_name = img.attr('alt') || ''
-        vd.vod_pic = img.attr('src') || ''
-        vd.vod_remarks = info.find('.star').text().trim()
-        return vd
-      })
-
+    const json = JSONbig.parse(resp.data || '{}')
+    const list = (json?.subjects || []).map((s) => {
+      const vd = new VideoDetail()
+      vd.vod_id = s.url
+      vd.vod_name = s.title
+      vd.vod_pic = s.cover
+      vd.vod_remarks = `评分 ${s.rating}`
+      return vd
+    })
     backData.data = list
   } catch (e) {
     backData.error = e.toString()
@@ -291,4 +284,3 @@ async function searchVideo(args) {
   }
   return JSON.stringify(backData)
 }
-
