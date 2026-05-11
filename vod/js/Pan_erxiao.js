@@ -1,6 +1,6 @@
 // ignore
 //@name:[盘] 二小
-//@version:2
+//@version:11
 //@webSite:http://2xiaopan.fun
 //@remark:
 //@order: A06
