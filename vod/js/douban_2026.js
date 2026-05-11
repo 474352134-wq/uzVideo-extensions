@@ -1,5 +1,5 @@
 //@name:{LHM}豆瓣
-//@version:7
+//@version:8
 //@webSite:https://movie.douban.com
 //@remark:使用网页爬取的方式实现豆瓣视频源，已在年份过滤中加入 2026
 //@order:A01
@@ -7,33 +7,6 @@
 //@env:
 //@isAV:0
 //@deprecated:0
-
-import {
-    FilterLabel,
-    FilterTitle,
-    VideoClass,
-    VideoSubclass,
-    VideoDetail,
-    RepVideoClassList,
-    RepVideoSubclassList,
-    RepVideoList,
-    RepVideoDetail,
-    RepVideoPlayUrl,
-    UZArgs,
-    UZSubclassVideoListArgs,
-} from '../core/uzVideo.js'
-
-import {
-    UZUtils,
-    ProData,
-    ReqResponseType,
-    ReqAddressType,
-    req,
-    toast,
-    formatBackData,
-} from '../core/uzUtils.js'
-
-import { cheerio, Crypto, Encrypt, JSONbig } from '../core/uz3lib.js'
 
 /* -------------------------------------------------
    辅助：生成年份下拉列表（已覆盖到 2026 年）
@@ -322,14 +295,3 @@ async function searchVideo(args) {
   return JSON.stringify(backData)
 }
 
-/* -------------------------------------------------
-   7️⃣ 导出（保持不改）
-   ------------------------------------------------- */
-export {
-  getClassList,
-  getSubclassList,
-  getVideoList,
-  getVideoDetail,
-  getVideoPlayUrl,
-  searchVideo,
-}
