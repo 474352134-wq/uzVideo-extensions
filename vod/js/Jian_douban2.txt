@@ -2,7 +2,7 @@
 
 //@name:[荐] 豆瓣
 //@webSite:https://movie.douban.com
-//@version:4
+//@version:7
 //@remark:🍃豆儿出品，不属精品！
 //@codeID:4r9lCCTjjoqI5sGDkzho2sNKSL2BQXpc
 //@order: A00
