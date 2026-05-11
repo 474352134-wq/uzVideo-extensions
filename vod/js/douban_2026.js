@@ -1,41 +1,14 @@
-// ignore
-
 //@name:{LHM}豆瓣
 //@type:101
 //@version:7
 //@webSite:https://movie.douban.com
-//@remark:使用网页爬取的方式实现豆瓣视频源，已在年份过滤中加入 2026 年
-//@order:A00          // 在订阅列表中排在最前面（可自行调节）
-//@codeID:            // 如不加密可留空
+//@remark:使用网页爬取的方式实现豆瓣视频源，已在年份过滤中加入 2026
+//@order:A01
+//@codeID:
 //@env:
 //@isAV:0
 //@deprecated:0
 
-// ignore
-
-
-
-// ignore
-// 不支持导入，这里只是本地开发用于代码提示
-// 如需添加通用依赖，请联系 https://t.me/uzVideoAppbot
-import {
-    FilterLabel,
-    FilterTitle,
-    VideoClass,
-    VideoSubclass,
-    VideoDetail,
-    RepVideoClassList,
-    RepVideoSubclassList,
-    RepVideoList,
-    RepVideoDetail,
-    RepVideoPlayUrl,
-    UZArgs,
-    UZSubclassVideoListArgs,
-} from '../core/uzVideo.js'
-
-//-------------------------------
-// ① 必要导入（保持不动）
-//-------------------------------
 import {
     FilterLabel,
     FilterTitle,
@@ -63,9 +36,9 @@ import {
 
 import { cheerio, Crypto, Encrypt, JSONbig } from '../core/uz3lib.js'
 
-//-------------------------------
-// ② 辅助函数：生成年份列表（这里把 2026 加进去）
-//-------------------------------
+/* -------------------------------------------------
+   辅助：生成年份下拉列表（已覆盖到 2026 年）
+   ------------------------------------------------- */
 function makeYearList(start, end) {
   const years = [{ name: '全部', id: '' }]
   for (let y = start; y >= end; y--) {
@@ -74,9 +47,9 @@ function makeYearList(start, end) {
   return years
 }
 
-//-------------------------------
-// ③ 1️⃣ 主分类列表（电影、电视剧、综艺、动漫、纪录片）
-//-------------------------------
+/* -------------------------------------------------
+   1️⃣ 主分类列表（电影、电视剧、综艺、动漫、纪录片）
+   ------------------------------------------------- */
 async function getClassList(args) {
   const backData = new RepVideoClassList()
   try {
@@ -93,14 +66,13 @@ async function getClassList(args) {
   return JSON.stringify(backData)
 }
 
-//-------------------------------
-// ④ 2️⃣ 二级过滤器（加入年份 2026）
-//-------------------------------
+/* -------------------------------------------------
+   2️⃣ 二级过滤器（在每个主分类里都加入 2026 年）
+   ------------------------------------------------- */
 async function getSubclassList(args) {
   const backData = new RepVideoSubclassList()
   const id = String(args.url || '')
 
-  // 公共地区、排序（保持与官方一致）
   const commonArea = [
     { name: '全部', id: '' },
     { name: '中国大陆', id: '中国大陆' },
@@ -120,8 +92,8 @@ async function getSubclassList(args) {
     { name: '评分排序', id: 'score' },
   ]
 
-  // 为每个主分类准备自己的“剧情/类型”列表，下面仅示例电影，其他可自行补全
   let filter = []
+
   switch (id) {
     case '1': // 电影
       filter = [
@@ -136,11 +108,10 @@ async function getSubclassList(args) {
             { name: '动画', id: '动画' },
             { name: '悬疑', id: '悬疑' },
             { name: '犯罪', id: '犯罪' },
-            // …自行补足更多类型
           ],
         },
         { name: '地区', list: commonArea },
-        // ★ 关键点：年份列表从 2026 开始
+        // ★ 关键点：把年份从 2026 开始
         { name: '年份', list: makeYearList(2026, 1990) },
         { name: '排序', list: commonSort },
       ]
@@ -154,7 +125,8 @@ async function getSubclassList(args) {
             { name: '全部', id: '' },
             { name: '古装', id: '古装' },
             { name: '现代', id: '现代' },
-            // …自行补足
+            { name: '悬疑', id: '悬疑' },
+            { name: '爱情', id: '爱情' },
           ],
         },
         { name: '地区', list: commonArea },
@@ -171,7 +143,7 @@ async function getSubclassList(args) {
             { name: '全部', id: '' },
             { name: '选秀', id: '选秀' },
             { name: '访谈', id: '访谈' },
-            // …自行补足
+            { name: '游戏互动', id: '游戏互动' },
           ],
         },
         { name: '地区', list: commonArea },
@@ -188,7 +160,7 @@ async function getSubclassList(args) {
             { name: '全部', id: '' },
             { name: '爱情', id: '爱情' },
             { name: '科幻', id: '科幻' },
-            // …自行补足
+            { name: '冒险', id: '冒险' },
           ],
         },
         { name: '地区', list: commonArea },
@@ -205,11 +177,11 @@ async function getSubclassList(args) {
             { name: '全部', id: '' },
             { name: '自然', id: '自然' },
             { name: '历史', id: '历史' },
-            // …自行补足
+            { name: '科技', id: '科技' },
           ],
         },
         { name: '地区', list: commonArea },
-        // 这里示例只到 2025，若想 2026 同样改为 makeYearList(2026,1999)
+        // 示例里不需要 2026，可自行改成 makeYearList(2026,1999)
         { name: '年份', list: makeYearList(2025, 1999) },
         { name: '排序', list: commonSort },
       ]
@@ -224,30 +196,26 @@ async function getSubclassList(args) {
   return JSON.stringify(backData)
 }
 
-//-------------------------------
-// ⑤ 3️⃣ 视频列表（示例：搜索豆瓣 Top250）
-//-------------------------------
+/* -------------------------------------------------
+   3️⃣ 列表页面（示例：豆瓣 Top250，分页 25 条）
+   ------------------------------------------------- */
 async function getVideoList(args) {
   const backData = new RepVideoList()
   try {
-    const classId = String(args.url || '')   // 1、2、3… 对应上面的 type_id
     const page = Number(args.page || 1)
-
-    // 这里采用豆瓣“Top250”作为演示数据源。你可以自行改为任意列表页面（例如分类、标签等）。
     const startIdx = (page - 1) * 25
     const url = `https://movie.douban.com/top250?start=${startIdx}&limit=25`
 
     const resp = await req(url, {
-      // 为防止豆瓣拒绝爬虫，伪装成常见浏览器
       headers: {
+        // 伪装成常见浏览器，防止豆瓣返回 403
         'User-Agent':
           'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
       },
     })
     const $ = cheerio.load(resp.data || '')
 
-    const items = $('.grid_view li')
-    const list = items
+    const list = $('.grid_view li')
       .toArray()
       .map((el) => {
         const $el = $(el)
@@ -256,10 +224,10 @@ async function getVideoList(args) {
         const info = $el.find('.info')
 
         const vd = new VideoDetail()
-        vd.vod_id = a.attr('href') || ''          // 这里把详情页 url 直接当作 id
+        vd.vod_id = a.attr('href') || ''
         vd.vod_name = img.attr('alt') || ''
         vd.vod_pic = img.attr('src') || ''
-        vd.vod_remarks = info.find('.star').text().trim() // 包含评分、评价人数等
+        vd.vod_remarks = info.find('.star').text().trim()
         return vd
       })
 
@@ -270,9 +238,9 @@ async function getVideoList(args) {
   return JSON.stringify(backData)
 }
 
-//-------------------------------
-// ⑥ 4️⃣ 视频详情（抓取豆瓣单条详情页）
-//-------------------------------
+/* -------------------------------------------------
+   4️⃣ 详情页（抓取豆瓣单条电影页面）
+   ------------------------------------------------- */
 async function getVideoDetail(args) {
   const backData = new RepVideoDetail()
   try {
@@ -292,17 +260,17 @@ async function getVideoDetail(args) {
     detail.vod_name = $('.subject h1 span').first().text().trim()
     detail.vod_pic = $('.subject .nbg img').attr('src') || ''
     detail.vod_remarks = $('.rating_self .rating_num').text().trim()
-    // 简单的简介
     detail.vod_content = $('#link-report .intro p')
       .toArray()
       .map((p) => $(p).text().trim())
       .join('\n')
 
-    // 将年份也放进 detail（可选）
-    const yearText = $('.subject .info span[property="v:initialReleaseDate"]').first()
+    // 将年份写入 detail（可选）
+    const year = $('.subject .info span[property="v:initialReleaseDate"]')
+      .first()
       .text()
       .trim()
-    if (yearText) detail.vod_year = yearText
+    if (year) detail.vod_year = year
 
     backData.data = detail
   } catch (e) {
@@ -311,19 +279,19 @@ async function getVideoDetail(args) {
   return JSON.stringify(backData)
 }
 
-//-------------------------------
-// ⑦ 播放地址（豆瓣本身没有播放链接，这里返回空字符串）
-//-------------------------------
+/* -------------------------------------------------
+   5️⃣ 播放地址（豆瓣本体没有资源，这里返回空）
+   ------------------------------------------------- */
 async function getVideoPlayUrl(args) {
   const backData = new RepVideoPlayUrl()
-  // 若你在后面自行接入磁力链、网盘、云盘等资源，这里返回对应的 URL 即可
+  // 如有自己解析到的磁力链、网盘链接，可在这里返回
   backData.data.play_url = ''
   return JSON.stringify(backData)
 }
 
-//-------------------------------
-// ⑧ 搜索（简单关键字搜索）
-//-------------------------------
+/* -------------------------------------------------
+   6️⃣ 搜索（使用豆瓣公开搜索接口）
+   ------------------------------------------------- */
 async function searchVideo(args) {
   const backData = new RepVideoList()
   try {
@@ -355,9 +323,9 @@ async function searchVideo(args) {
   return JSON.stringify(backData)
 }
 
-//-------------------------------
-// ⑨ 导出（保持不改）
-//-------------------------------
+/* -------------------------------------------------
+   7️⃣ 导出（保持不改）
+   ------------------------------------------------- */
 export {
   getClassList,
   getSubclassList,
