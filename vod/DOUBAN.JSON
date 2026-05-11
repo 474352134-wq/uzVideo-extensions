@@ -1,0 +1,12 @@
+{
+  "name": "{LHM}豆瓣",
+  "version": 7,
+  "remark": "自建豆瓣视频源，已在年份过滤中加入 2026 年",
+  "api": "https://raw.githubusercontent.com/<YOUR_USER>/<YOUR_REPO>/main/vod/js/myDouban101.js",
+  "type": 101,
+  "webSite": "https://movie.douban.com",
+  "codeID": "",
+  "env": "",
+  "isAV": 0,
+  "deprecated": 0
+}
