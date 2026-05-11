@@ -1,6 +1,6 @@
 {
   "name": "{LHM}豆瓣",
-  "version": 7,
+  "version": 8,
   "remark": "自建豆瓣视频源，已在年份过滤中加入 2026 年",
   "api": "https://raw.githubusercontent.com/474352134-wq/uzVideo-extensions/main/vod/js/douban_2026.js",
   "type": 101,
